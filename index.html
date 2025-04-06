@@ -172,6 +172,127 @@
                 transform: scale(1);
             }
         }
+
+        /* Add gradient background to body */
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 60px; /* Space for the footer */
+        }
+        
+        /* Footer styles */
+        .footer {
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 30px;
+            color: #566573;
+            font-size: 14px;
+        }
+        
+        .dev-credit-link {
+            color: #3498db;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .dev-credit-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        
+        /* Developer credit popup */
+        .dev-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .dev-popup-content {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: popup-appear 0.5s ease-out;
+        }
+        
+        @keyframes popup-appear {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .dev-popup-close {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #95a5a6;
+            transition: color 0.2s;
+        }
+        
+        .dev-popup-close:hover {
+            color: #e74c3c;
+        }
+        
+        .dev-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #2c3e50;
+        }
+        
+        /* Hearts animation */
+        .hearts-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            animation: float-heart 4s ease-in-out infinite;
+            opacity: 0;
+            color: #e74c3c;
+        }
+        
+        @keyframes float-heart {
+            0% {
+                transform: translateY(100%) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100%) scale(1.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -245,6 +366,23 @@
         </div>
     </div>
 
+    <!-- Add Footer -->
+    <div class="footer">
+        This is for educational purposes only | 
+        <a class="dev-credit-link" id="devCreditLink">Developer</a>
+    </div>
+    
+    <!-- Developer Credit Popup -->
+    <div class="dev-popup" id="devPopup">
+        <div class="dev-popup-content">
+            <span class="dev-popup-close" id="closePopup">&times;</span>
+            <div class="hearts-container" id="heartsContainer"></div>
+            <h2 class="dev-name">John_Allen</h2>
+            <p>Thank you for using this application. This is intended for my baby VV😘!</p>
+            <p><a href="https://www.instagram.com/uddrainallen/profilecard/?igsh=cXgwcnIxY2htbjZ6" target="_blank">myAccount</a></p>
+        </div>
+    </div>
+
     <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -285,6 +423,46 @@
                 this.style.height = 'auto';
                 this.style.height = (this.scrollHeight) + 'px';
             });
+
+            // Developer credit popup functionality
+            const devCreditLink = document.getElementById('devCreditLink');
+            const devPopup = document.getElementById('devPopup');
+            const closePopup = document.getElementById('closePopup');
+            const heartsContainer = document.getElementById('heartsContainer');
+            
+            devCreditLink.addEventListener('click', function() {
+                devPopup.style.display = 'flex';
+                createHearts();
+            });
+            
+            closePopup.addEventListener('click', function() {
+                devPopup.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === devPopup) {
+                    devPopup.style.display = 'none';
+                }
+            });
+            
+            // Function to create floating hearts
+            function createHearts() {
+                heartsContainer.innerHTML = '';
+                const heartCount = 15;
+                
+                for (let i = 0; i < heartCount; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.className = 'heart';
+                        heart.innerHTML = '❤️';
+                        heart.style.left = Math.random() * 100 + '%';
+                        heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                        heart.style.animationDelay = (Math.random() * 2) + 's';
+                        heart.style.opacity = '0';
+                        heartsContainer.appendChild(heart);
+                    }, i * 300);
+                }
+            }
         });
     </script>
 </body>
