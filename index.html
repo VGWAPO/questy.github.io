@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
     <title>Questionnaire Analysis</title>
     <link rel="stylesheet" href="styles.css">
     <style>
@@ -241,14 +241,54 @@
             position: absolute;
             right: 15px;
             top: 10px;
-            font-size: 24px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e74c3c;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            color: #95a5a6;
-            transition: color 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s;
         }
         
         .dev-popup-close:hover {
-            color: #e74c3c;
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+        
+        .dev-popup-close:after {
+            content: "×";
+            line-height: 1;
+        }
+        
+        .dev-popup-close.timer-running {
+            cursor: not-allowed;
+            animation: pulse-red 1s infinite alternate;
+        }
+        
+        @keyframes pulse-red {
+            0% { background-color: #e74c3c; }
+            100% { background-color: #c0392b; }
+        }
+        
+        /* Circle profile photo styling */
+        .dev-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #3498db;
+            margin: 0 auto 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .dev-photo:hover {
+            transform: scale(1.05);
         }
         
         .dev-name {
@@ -292,6 +332,29 @@
                 transform: translateY(-100%) scale(1.2) rotate(360deg);
                 opacity: 0;
             }
+        }
+        
+        /* Timer styles */
+        .timer-container {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin: 8px auto;
+            overflow: hidden;
+            max-width: 200px;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 1s linear;
         }
     </style>
 </head>
@@ -366,7 +429,7 @@
         </div>
     </div>
 
-    <!-- Add Footer -->
+    <!-- Move footer outside the container so it can be fixed at bottom -->
     <div class="footer">
         This is for educational purposes only | 
         <a class="dev-credit-link" id="devCreditLink">Developer</a>
@@ -375,11 +438,23 @@
     <!-- Developer Credit Popup -->
     <div class="dev-popup" id="devPopup">
         <div class="dev-popup-content">
-            <span class="dev-popup-close" id="closePopup">&times;</span>
+            <div class="dev-popup-close" id="closePopup"></div>
             <div class="hearts-container" id="heartsContainer"></div>
-            <h2 class="dev-name">John_Allen</h2>
-            <p>Thank you for using this application. This is intended for my baby VV😘!</p>
+            <img src="phototoy.jpg" alt="John Allen" class="dev-photo">
+            <h2 class="dev-name">Thank you for using this application. This is a project for my VV😘!</h2>
+            <p>The problem is not the problem, the problem is the problem-solving.</p>
             <p><a href="https://www.instagram.com/uddrainallen/profilecard/?igsh=cXgwcnIxY2htbjZ6" target="_blank">myAccount</a></p>
+            <div class="timer-container" id="timerContainer">
+                <p>Please wait <span id="closeTimer">10</span> seconds...</p>
+                <div class="progress-bar">
+                    <div class="progress" id="closeProgress"></div>
+                </div>
+            </div>
+            <!-- Hidden audio element for background music -->
+            <audio id="popupMusic" loop>
+                <source src="paanoy.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
         </div>
     </div>
 
@@ -429,21 +504,104 @@
             const devPopup = document.getElementById('devPopup');
             const closePopup = document.getElementById('closePopup');
             const heartsContainer = document.getElementById('heartsContainer');
+            const popupMusic = document.getElementById('popupMusic');
+            const closeProgress = document.getElementById('closeProgress');
+            const timerContainer = document.getElementById('timerContainer');
+            const closeTimer = document.getElementById('closeTimer');
             
+            let timerInterval;
+            let popupCloseEnabled = false;
+            let timeLeft = 10;
+            let musicIsPlaying = false;
+            
+            // Open popup when developer link is clicked
             devCreditLink.addEventListener('click', function() {
+                openDevPopup();
+            });
+            
+            // Add "close" button event listener (actually a play/close button)
+            if (closePopup) {
+                closePopup.addEventListener('click', function() {
+                    if (!musicIsPlaying) {
+                        // First click - play music
+                        playMusic();
+                    } else if (popupCloseEnabled) {
+                        // Only allow closing after timer completes
+                        closeDevPopup();
+                    }
+                });
+            }
+            
+            function openDevPopup() {
                 devPopup.style.display = 'flex';
                 createHearts();
-            });
+                popupCloseEnabled = false;
+                musicIsPlaying = false;
+                timerContainer.style.display = 'none';
+                closeProgress.style.width = '0%';
+                
+                // Reset the X button state
+                closePopup.classList.remove('timer-running');
+            }
             
-            closePopup.addEventListener('click', function() {
+            function playMusic() {
+                popupMusic.volume = 0.5;
+                popupMusic.currentTime = 0;
+                
+                // Try playing music
+                popupMusic.play()
+                .then(() => {
+                    console.log("Audio is playing successfully");
+                    musicIsPlaying = true;
+                    
+                    // Start 10-second timer to enable closing
+                    startCloseTimer();
+                })
+                .catch(error => {
+                    console.error("Play prevented:", error);
+                    // Even if play fails, pretend it worked and start timer
+                    musicIsPlaying = true;
+                    startCloseTimer();
+                });
+            }
+            
+            function closeDevPopup() {
                 devPopup.style.display = 'none';
-            });
+                popupMusic.pause();
+                clearInterval(timerInterval);
+                popupCloseEnabled = false;
+                musicIsPlaying = false;
+            }
             
-            window.addEventListener('click', function(event) {
-                if (event.target === devPopup) {
-                    devPopup.style.display = 'none';
-                }
-            });
+            function startCloseTimer() {
+                // Reset and start timer
+                timeLeft = 10;
+                closeTimer.textContent = timeLeft;
+                timerContainer.style.display = 'block';
+                
+                // Add special class to X button to show it's in timer mode
+                closePopup.classList.add('timer-running');
+                
+                // Clear any existing intervals
+                clearInterval(timerInterval);
+                
+                timerInterval = setInterval(function() {
+                    timeLeft--;
+                    closeTimer.textContent = timeLeft;
+                    
+                    // Update progress bar
+                    const progressPercent = (10 - timeLeft) * 10;
+                    closeProgress.style.width = progressPercent + '%';
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        popupCloseEnabled = true;
+                        
+                        // Remove timer-running class to show it's now clickable
+                        closePopup.classList.remove('timer-running');
+                    }
+                }, 1000);
+            }
             
             // Function to create floating hearts
             function createHearts() {
@@ -463,6 +621,11 @@
                     }, i * 300);
                 }
             }
+            
+            // Prevent clicking outside popup from closing it
+            window.addEventListener('click', function(event) {
+                // Do nothing - we don't want to allow closing by clicking outside
+            });
         });
     </script>
 </body>
