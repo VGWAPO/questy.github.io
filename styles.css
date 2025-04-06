@@ -3,15 +3,22 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f0f4f8;
     line-height: 1.6;
+    /* The background gradient is now set in the inline style in index.html */
+    /* Background color fallback for older browsers */
+    background-color: #f0f4f8; 
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 60px;
 }
 
 .container {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
     padding: 25px;
-    box-shadow: 0 6px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 h1 {
@@ -603,6 +610,8 @@ button:active {
 }
 
 .history-header {
+    position: sticky;
+    top: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -610,37 +619,16 @@ button:active {
     border-bottom: 1px solid #ddd;
     background-color: #f8f9fa;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-}
-
-.history-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.history-header h3:before {
-    content: "\1F4C3";
-    font-size: 18px;
-    color: #3498db;
+    z-index: 10;
 }
 
 .history-filter {
+    position: sticky;
+    top: 50px;
     padding: 10px 15px;
     border-bottom: 1px solid #eee;
     background-color: #f8f9fa;
-}
-
-.algorithm-filter {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #2c3e50;
-    background-color: white;
+    z-index: 9;
 }
 
 .history-list {
@@ -650,191 +638,145 @@ button:active {
     background-color: #fcfcfc;
 }
 
-/* Redesigned history item */
-.history-item {
-    background-color: #fff;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+/* Sidebar overlay - blocks interaction with main content */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
-.history-item:hover {
-    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-    transform: translateY(-2px);
-    border-color: #3498db;
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
 }
 
-.history-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    padding-bottom: 6px;
-    border-bottom: 1px dashed #f0f0f0;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.history-date {
-    font-size: 11px;
-    color: #666;
-    background-color: #f8f9fa;
-    padding: 3px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-.history-algorithm {
-    background-color: #3498db;
+/* Bottom close button for mobile */
+.close-bottom-btn {
+    display: none;
+    margin: 15px;
+    padding: 15px 0;
+    background-color: #e74c3c;
     color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
     font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-.history-input-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f9f9f9;
-    padding: 6px 8px;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    border: 1px solid #f0f0f0;
-}
-
-.history-input-text {
-    font-family: monospace;
-    font-size: 13px;
-    color: #333;
-    word-break: break-all;
-    flex: 1;
-    max-height: 20px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.history-copy-btn {
-    background-color: #f0f7fc;
-    color: #3498db;
-    border: 1px solid #d6eaf8;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 11px;
-    margin-left: 8px;
-    min-width: 40px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.history-copy-btn:hover {
-    background-color: #d6eaf8;
-}
-
-.history-summary {
-    font-size: 12px;
-    color: #555;
-    padding: 6px 8px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    margin-top: 4px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.history-summary-row {
-    background-color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid #f0f0f0;
-}
-
-.clear-history-btn {
-    margin: 10px;
-    background-color: #e74c3c;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
-
-.clear-history-btn:before {
-    content: "\1F5D1"; /* Trash emoji */
-    font-size: 14px;
-}
-
-.clear-history-btn:hover {
-    background-color: #c0392b;
-}
-
-/* Empty state styling */
-.history-empty {
-    padding: 20px;
     text-align: center;
-    color: #95a5a6;
-    font-style: italic;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+    cursor: pointer;
 }
 
-.history-empty:before {
-    content: "\1F4C3";
-    font-size: 30px;
-    opacity: 0.3;
-}
-
-/* History counts display */
-.history-counts {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-    margin-bottom: 15px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #eee;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.count-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: #2c3e50;
-}
-
-.count-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 24px;
-    height: 24px;
-    border-radius: 12px;
-    color: white;
-    font-weight: bold;
-    font-size: 12px;
-    padding: 0 8px;
-}
-
-.count-badge.learning {
-    background-color: #3498db;
-}
-
-.count-badge.teaching {
-    background-color: #e74c3c;
+/* Mobile adjustments for history */
+@media (max-width: 768px) {
+    .history-sidebar {
+        width: 100%;
+        right: -100%;
+        z-index: 2000;
+    }
+    
+    .history-sidebar.open {
+        right: 0;
+    }
+    
+    .close-bottom-btn {
+        display: block;
+    }
+    
+    .history-header {
+        padding: 15px;
+    }
+    
+    .history-header h3 {
+        font-size: 20px;
+    }
+    
+    .toggle-history-btn {
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .history-filter {
+        padding: 12px 15px;
+    }
+    
+    .algorithm-filter {
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .history-list {
+        padding: 15px;
+    }
+    
+    .history-item {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .history-item-header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .history-date {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+    
+    .history-algorithm {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+    
+    .history-input-container {
+        padding: 10px;
+        margin-bottom: 12px;
+    }
+    
+    .history-input-text {
+        font-size: 16px;
+    }
+    
+    .history-copy-btn {
+        min-width: 60px;
+        height: 35px;
+        padding: 0 15px;
+        font-size: 14px;
+    }
+    
+    .history-summary {
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .history-summary-row {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .clear-history-btn {
+        padding: 15px 0;
+        margin: 15px;
+        font-size: 16px;
+        border-radius: 8px;
+    }
+    
+    /* Prevent body scrolling when sidebar is open */
+    body.sidebar-open {
+        overflow: hidden;
+    }
 }
 
 /* Header wrapper styling */
@@ -992,4 +934,30 @@ button:active {
     .instructions ul {
         padding-left: 20px;
     }
+}
+
+/* Footer styles - if you prefer to have them in the CSS file instead of inline */
+.footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 30px;
+    color: #566573;
+    font-size: 14px;
+}
+
+.dev-credit-link {
+    color: #3498db;
+    text-decoration: none;
+    cursor: pointer;
+    position: relative;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.dev-credit-link:hover {
+    color: #2980b9;
+    text-decoration: underline;
 }
