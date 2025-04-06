@@ -1011,4 +1011,143 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // Initialize developer credit popup functionality
+    initDeveloperPopup();
+
+    // Initialize developer credit popup
+    function initDeveloperPopup() {
+        const devCreditLink = document.getElementById('devCreditLink');
+        const devPopup = document.getElementById('devPopup');
+        const closePopup = document.getElementById('closePopup');
+        const heartsContainer = document.getElementById('heartsContainer');
+        const popupMusic = document.getElementById('popupMusic');
+        const timerContainer = document.getElementById('timerContainer');
+        const closeProgress = document.getElementById('closeProgress');
+        const closeTimer = document.getElementById('closeTimer');
+        
+        let timerInterval;
+        let popupCloseEnabled = false;
+        let timeLeft = 10;
+        let musicIsPlaying = false;
+        
+        if (devCreditLink && devPopup && closePopup) {
+            // Show the popup automatically on page load
+            setTimeout(() => {
+                openDevPopup();
+            }, 1000); // Short delay to ensure everything is loaded
+            
+            // Dev credit link click handler
+            devCreditLink.addEventListener('click', function() {
+                openDevPopup();
+            });
+            
+            // Add "close" button event listener (actually a play/close button)
+            closePopup.addEventListener('click', function() {
+                if (!musicIsPlaying) {
+                    // First click - play music
+                    playMusic();
+                } else if (popupCloseEnabled) {
+                    // Only allow closing after timer completes
+                    closeDevPopup();
+                }
+            });
+        }
+        
+        function openDevPopup() {
+            devPopup.style.display = 'flex';
+            createHearts();
+            popupCloseEnabled = false;
+            musicIsPlaying = false;
+            if (timerContainer) timerContainer.style.display = 'none';
+            if (closeProgress) closeProgress.style.width = '0%';
+            
+            // Reset the X button state
+            if (closePopup) closePopup.classList.remove('timer-running');
+        }
+        
+        function playMusic() {
+            if (!popupMusic) return;
+            
+            popupMusic.volume = 0.5;
+            popupMusic.currentTime = 0;
+            
+            // Try playing music
+            popupMusic.play()
+            .then(() => {
+                console.log("Audio is playing successfully");
+                musicIsPlaying = true;
+                
+                // Start 10-second timer to enable closing
+                startCloseTimer();
+            })
+            .catch(error => {
+                console.error("Play prevented:", error);
+                // Even if play fails, pretend it worked and start timer
+                musicIsPlaying = true;
+                startCloseTimer();
+            });
+        }
+        
+        function closeDevPopup() {
+            devPopup.style.display = 'none';
+            if (popupMusic) popupMusic.pause();
+            clearInterval(timerInterval);
+            popupCloseEnabled = false;
+            musicIsPlaying = false;
+        }
+        
+        function startCloseTimer() {
+            if (!closeTimer || !closeProgress || !timerContainer) return;
+            
+            // Reset and start timer
+            timeLeft = 10;
+            closeTimer.textContent = timeLeft;
+            timerContainer.style.display = 'block';
+            
+            // Add special class to X button to show it's in timer mode
+            if (closePopup) closePopup.classList.add('timer-running');
+            
+            // Clear any existing intervals
+            clearInterval(timerInterval);
+            
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                closeTimer.textContent = timeLeft;
+                
+                // Update progress bar
+                const progressPercent = (10 - timeLeft) * 10;
+                closeProgress.style.width = progressPercent + '%';
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    popupCloseEnabled = true;
+                    
+                    // Remove timer-running class to show it's now clickable
+                    if (closePopup) closePopup.classList.remove('timer-running');
+                }
+            }, 1000);
+        }
+        
+        // Function to create floating hearts animation
+        function createHearts() {
+            if (!heartsContainer) return;
+            
+            heartsContainer.innerHTML = '';
+            const heartCount = 15;
+            
+            for (let i = 0; i < heartCount; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.innerHTML = '❤️';
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                    heart.style.animationDelay = (Math.random() * 2) + 's';
+                    heart.style.opacity = '0';
+                    heartsContainer.appendChild(heart);
+                }, i * 300);
+            }
+        }
+    }
 });
