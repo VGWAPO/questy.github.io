@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Questionnaire Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .instructions-header {
+            cursor: pointer;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .instructions-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .instructions-content.open {
+            max-height: 1000px;
+        }
+        
+        .toggle-icon::after {
+            content: '▼';
+        }
+        
+        .instructions-header.collapsed .toggle-icon::after {
+            content: '▶';
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .input-area {
+            flex: 1;
+        }
+
+        .chat-input-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .chat-input-box {
+            width: 100%;
+            min-height: 60px;
+            max-height: 200px;
+            padding: 15px;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .chat-input-box:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .chat-input-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            border-top: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chat-input-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .char-counter {
+            position: static;
+            color: #ffffff;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .algorithm-selector {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .algorithm-selector select {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .chat-input-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .input-container {
+                flex-direction: column;
+            }
+
+            .chat-input-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .chat-input-left {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .algorithm-selector {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .algorithm-selector select {
+                width: 100%;
+            }
+            
+            .chat-input-buttons {
+                width: 100%;
+            }
+            
+            .chat-input-buttons button {
+                flex: 1;
+            }
+        }
+
+        .chat-input-container.mode-change {
+            animation: modeChangeAnimation 0.5s ease-in-out;
+        }
+
+        @keyframes modeChangeAnimation {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Questionnaire Analysis</h1>
+        
+        <div class="input-area">
+            <div class="chat-input-container">
+                <textarea id="numberInput" class="chat-input-box" placeholder="Enter ratings here (1-5 for each question)" autofocus></textarea>
+                <div class="chat-input-actions">
+                    <div class="chat-input-left">
+                        <div id="charCounter" class="char-counter">0 digits</div>
+                        <div class="algorithm-selector">
+                            <label for="algorithmSelector">Mode:</label>
+                            <select id="algorithmSelector">
+                                <option value="algorithmA">Learning Styles</option>
+                                <option value="algorithmB">Teaching Approach</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chat-input-buttons">
+                        <button id="clearBtn" class="clear-btn">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="algorithmAInstructions" class="instructions">
+            <div class="instructions-header">
+                <span>Instructions for Learning Styles</span>
+                <span class="toggle-icon"></span>
+            </div>
+            <div class="instructions-content">
+                <p>Enter ratings (1-5) for learning style questions:</p>
+                <p>The system will automatically match each rating to its corresponding question number and categorize it by learning style.</p>
+                <ul>
+                    <li>Independent: 1, 7, 13, 19, 25, 31, 37, 43, 49, 55</li>
+                    <li>Avoidant: 2, 8, 14, 20, 26, 32, 38, 44, 50, 56</li>
+                    <li>Collaborative: 3, 9, 15, 21, 27, 33, 39, 45, 51, 57</li>
+                    <li>Dependent: 4, 10, 16, 22, 28, 34, 40, 46, 52, 58</li>
+                    <li>Competitive: 5, 11, 17, 23, 29, 35, 41, 47, 53, 59</li>
+                    <li>Participant: 6, 12, 18, 24, 30, 36, 42, 48, 54, 60</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="algorithmBInstructions" class="instructions" style="display: none;">
+            <div class="instructions-header">
+                <span>Instructions for Teaching Approach</span>
+                <span class="toggle-icon"></span>
+            </div>
+            <div class="instructions-content">
+                <p>Enter ratings (1-5) for teaching approach questions:</p>
+                <p>The system will automatically match each rating to its corresponding question number and categorize it by teaching approach.</p>
+                <ul>
+                    <li>Cooperative learning: 16, 21, 29, 37, 38, 39, 43</li>
+                    <li>Lecture type: 3, 22, 25, 32, 40, 44, 46</li>
+                    <li>Deductive approach: 5, 12, 14, 18, 26, 34, 36</li>
+                    <li>Inductive Approach: 1, 7, 13, 17, 20, 42, 48</li>
+                    <li>Demonstration: 4, 11, 19, 27, 28, 35, 49</li>
+                    <li>Repetitive exercise: 6, 9, 15, 24, 31, 45, 47</li>
+                    <li>Integrative approach: 2, 8, 10, 23, 30, 33, 41</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="result-container">
+            <div id="results">
+                <div class="empty-message">Your categorized ratings will appear here</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const algorithmSelector = document.getElementById('algorithmSelector');
+            const algorithmAInstructions = document.getElementById('algorithmAInstructions');
+            const algorithmBInstructions = document.getElementById('algorithmBInstructions');
+            
+            algorithmSelector.addEventListener('change', function() {
+                if (this.value === 'algorithmA') {
+                    algorithmAInstructions.style.display = 'block';
+                    algorithmBInstructions.style.display = 'none';
+                } else {
+                    algorithmAInstructions.style.display = 'none';
+                    algorithmBInstructions.style.display = 'block';
+                }
+                
+                const container = document.querySelector('.chat-input-container');
+                container.classList.add('mode-change');
+                setTimeout(() => {
+                    container.classList.remove('mode-change');
+                }, 500);
+            });
+            
+            const instructionHeaders = document.querySelectorAll('.instructions-header');
+            
+            instructionHeaders.forEach(header => {
+                header.classList.add('collapsed');
+                
+                header.addEventListener('click', function() {
+                    this.classList.toggle('collapsed');
+                    const content = this.nextElementSibling;
+                    content.classList.toggle('open');
+                });
+            });
+            
+            const chatInput = document.getElementById('numberInput');
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        });
+    </script>
+</body>
+</html>
