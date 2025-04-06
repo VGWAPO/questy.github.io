@@ -165,7 +165,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check if the sidebar was previously open
         if (localStorage.getItem('sidebarOpen') === 'true') {
             sidebarContainer.classList.add('open');
+            
+            // If on mobile, also add the scroll lock and overlay
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('sidebar-open');
+                
+                // Create and show overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'sidebar-overlay active';
+                overlay.addEventListener('click', toggleHistorySidebar);
+                document.body.appendChild(overlay);
+            }
         }
+        
+        // Add a close button at the bottom for easier closing on mobile
+        const closeBottomBtn = document.createElement('button');
+        closeBottomBtn.className = 'close-bottom-btn';
+        closeBottomBtn.textContent = 'Close History';
+        closeBottomBtn.addEventListener('click', toggleHistorySidebar);
+        sidebarContainer.appendChild(closeBottomBtn);
     }
     
     // Toggle history sidebar
@@ -175,9 +193,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sidebar.classList.contains('open')) {
             sidebar.classList.remove('open');
             localStorage.setItem('sidebarOpen', 'false');
+            
+            // Remove body scroll lock and overlay
+            document.body.classList.remove('sidebar-open');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 300);
+            }
         } else {
             sidebar.classList.add('open');
             localStorage.setItem('sidebarOpen', 'true');
+            
+            // Add body scroll lock and overlay
+            document.body.classList.add('sidebar-open');
+            
+            // Create overlay if it doesn't exist
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'sidebar-overlay';
+                overlay.addEventListener('click', toggleHistorySidebar);
+                document.body.appendChild(overlay);
+            }
+            
+            // Show the overlay with a slight delay for animation
+            setTimeout(() => {
+                overlay.classList.add('active');
+            }, 10);
         }
     }
     
@@ -925,5 +972,43 @@ document.addEventListener('DOMContentLoaded', () => {
     
     numberInput.addEventListener('blur', function() {
         document.body.classList.remove('mobile-input-active');
+    });
+
+    // Add window resize handler to adjust UI based on screen size
+    window.addEventListener('resize', () => {
+        const sidebar = document.getElementById('historySidebar');
+        
+        // Check if sidebar exists and is open
+        if (sidebar && sidebar.classList.contains('open')) {
+            // If resized to mobile from desktop
+            if (window.innerWidth <= 768 && !document.body.classList.contains('sidebar-open')) {
+                document.body.classList.add('sidebar-open');
+                
+                // Create overlay if it doesn't exist
+                let overlay = document.querySelector('.sidebar-overlay');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.className = 'sidebar-overlay active';
+                    overlay.addEventListener('click', toggleHistorySidebar);
+                    document.body.appendChild(overlay);
+                } else {
+                    overlay.classList.add('active');
+                }
+            } 
+            // If resized to desktop from mobile
+            else if (window.innerWidth > 768 && document.body.classList.contains('sidebar-open')) {
+                document.body.classList.remove('sidebar-open');
+                
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    }, 300);
+                }
+            }
+        }
     });
 });
